@@ -261,7 +261,7 @@ You can also log in to the Gitea repository with the following credentials.
 * Password - `{openshift-password}`
 ====
 
-Select `Source dode` in Analysis mode popup.
+Select `Source code` in Analysis mode popup.
 
 image::add-applications.png[Add applications]
 
