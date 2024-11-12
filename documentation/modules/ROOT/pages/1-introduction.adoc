@@ -1,104 +1,106 @@
-= 1. Introduction - 10 minutes
+= 1. 소개 - 10분
 :imagesdir: ../assets/images
 
 [NOTE]
 ====
-If you've already completed the introduction exercise in the previous module, feel free to skip to the 'Refactor' lab. This exercise is meant to introduce you to the environment and confirm your services are running correctly.
+이전 모듈에서 소개 연습을 이미 완료했다면, '리팩토링' 랩으로 건너뛰어도 됩니다. 이 연습은 환경을 소개하고 서비스가 올바르게 실행되고 있는지 확인하기 위한 것입니다.
 ====
 
-A common way of speaking about migrating or modernizing workloads to the cloud has been coined as the *6 Rs framework*. This framework can be broken down as follows.
+워크로드를 클라우드로 마이그레이션하거나 현대화하는 것에 대해 말하는 일반적인 방식은 *6R 프레임워크*로 명명되었습니다. 이 프레임워크는 다음과 같이 세분화할 수 있습니다.
 
 image::mod-strategies-refactor.png[Modernization Strategies]
 
-For a Refactor (including rewrites or re-architectures),Red Hat helps our customers' application modernization journey with this approach:
+리팩토링(재작성 또는 재아키텍처 포함)의 경우, Red Hat은 다음과 같은 접근 방식을 통해 고객의 애플리케이션 현대화 여정을 지원합니다.
 
-* Iteratively strangle services into individual observable microservices running in separate containers.
-* More productive developers via fast inner loop development. Faster startup time using link:https://www.redhat.com/en/products/runtimes[cloud-native runtimes^] (e.g. link:https://www.redhat.com/en/topics/cloud-native-apps/what-is-quarkus[Quarkus^], link:https://access.redhat.com/products/spring-boot[Spring Boot^])
-* Isolated domains allow for faster iteration, recovery of services, efficient scalability, and ability to experiment more quickly.
-* Basis to begin integrating with application services for greater innovation and reach at lower costs
+* 개별적으로 관찰 가능한 마이크로서비스로 서비스를 반복적으로 전환하여 각각의 컨테이너에서 실행
+* 빠른 내부 개발 루프를 통한 개발자 생산성 향상. link:https://www.redhat.com/en/products/runtimes[클라우드 네이티브 런타임^] (예: link:https://www.redhat.com/en/topics/cloud-native-apps/what-is-quarkus[Quarkus^], link:https://access.redhat.com/products/spring-boot[Spring Boot^])을 사용하여 더 빠른 시작 시간 확보 (예: Quarkus, Spring Boot)
+* 격리된 도메인을 통해 더 빠른 반복 작업, 서비스 복구, 효율적인 확장성, 그리고 빠른 실험 가능
+* 더 높은 혁신성과 확장성을 보다 낮은 비용으로 달성하기 위해 애플리케이션 서비스와 통합할 수 있는 기초 마련
 
-This module will walk you through 2 of the phases (_Refactor_, _Deployment_) as follows:
+이 모듈은 다음과 같이 2가지 단계(_리팩토링_, _배포_)를 안내합니다.
 
-* Refactor the legacy application (*Customers*) to fix the legacy configuration issue in the https://docs.redhat.com/en/documentation/migration_toolkit_for_applications/7.0/html-single/introduction_to_the_migration_toolkit_for_applications/index[Migration Toolkit for Applications (MTA)^] Analysis report
-* Deploy the modernized applications to OpenShift using link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.15/html/builds_using_buildconfig/creating-build-inputs#builds-binary-source_creating-build-inputs[OpenShift Binary Build and Deployment^]
+* 레거시 애플리케이션(*Customers*)을 리팩토링하여 https://docs.redhat.com/en/documentation/migration_toolkit_for_applications/7.0/html-single/introduction_to_the_migration_toolkit_for_applications/index[Migration Toolkit for Applications (MTA)^] 분석 보고서에 있는 레거시 구성 문제를 해결합니다.
+* link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.15/html/builds_using_buildconfig/creating-build-inputs#builds-binary-source_creating-build-inputs[OpenShift 바이너리 빌드 및 배포^]를 사용하여 현대화된 애플리케이션을 OpenShift에 배포합니다.
 
-== 1.1. Understand the Globex Retail System Architecture
+== 1.1. Globex 리테일 시스템 아키텍처 이해
 
-Globex is a fictional company we will use for this workshop. The Globex system in your workshop environment consists of microservices applications that are deployed across multiple platforms such as virtual machines and a container platform as depicted below.
+Globex는 이 워크숍에서 사용할 가상의 회사입니다. 워크숍 환경의 Globex 시스템은 아래에 설명된 대로 가상머신과 컨테이너 플랫폼 등 여러 플랫폼에 배포된 마이크로서비스 애플리케이션으로 구성되어 있습니다.
 
 image::architecture_initial_m2.png[architecture_initial_m2]
 
-Your initial state for this workshop is an environment that is spread over Legacy Virtualization and Red Hat OpenShift Container Platform.
+이 워크숍의 초기 상태는 레거시 가상화 및 Red Hat OpenShift 컨테이너 플랫폼에 걸쳐 있는 환경입니다.
 
-Your application has already been partially moved from your legacy environments to OpenShift.
+애플리케이션은 레거시 환경에서 일부가 이미 OpenShift로 이전된 상태입니다.
 
-The Globex retail application consists of a _Node.js_ frontend service which is getting its data via a gateway service. The gateway service is connected to three backend services: customers, orders and inventory. Each service uses its own database to store data.
+Globex 리테일 애플리케이션은 _Node.js_ 프론트엔드 서비스로 구성되어 있으며, 데이터는 게이트웨이 서비스를 통해 가져옵니다. 게이트웨이 서비스는 세 개의 백엔드 서비스(customers, orders, inventory)와 연결되어 있으며, 각 서비스는 자체 데이터베이스를 사용해 데이터를 저장합니다.
 
-The services running on OpenShift are deployed in a namespace `retail-%USERID%`. You will eventually manage these services using *OpenShift GitOps* and *Pipelines* in later modules.
+OpenShift에서 실행 중인 서비스는 `retail-%USERID%` 네임스페이스에 배포됩니다. 이후 모듈에서 *OpenShift GitOps* 와 *Pipelines*를 사용하여 이러한 서비스를 관리하게 됩니다.
 
 [IMPORTANT]
 ====
-**You might see the customers pods are in a failed state due to _ImagePullBackOff Error_. It will be automatically fixed when you finish the OpenShift CI/CD and GitOps sections later.**
+**customers 파드가 _ImagePullBackOff Error_ 로 인해 실패한 상태일 수 있습니다. 나중에 OpenShift CI/CD 및 GitOps 섹션을 완료하면 자동으로 수정됩니다.**
 ====
 
-All source code for the applications as well as the GitOps YAML manifests for all services are stored in a (Git-compatible) *Gitea* repository that for workshop purposes is hosted on the OpenShift cluster.
+애플리케이션의 모든 소스 코드와 모든 서비스의 GitOps YAML 매니페스트는 워크숍 목적으로 OpenShift 클러스터에 호스팅된 (Git 호환) *Gitea* 저장소에 저장됩니다.
 
-The problem right now is in the *customers* service:
+현재 애플리케이션의 문제는 *customers* 서비스에 있습니다.
 
-* The customers service uses an old Java code base running on Apache Tomcat in a VM on Legacy Virtualization. In this module you will assess and analyze this legacy Java application to learn the best way to modernize the Java code and then deploy the application to OpenShift on top of Red Hat JBoss Web Server.
-* The customers database is using an PostgreSQL database running as a VM in Legacy Virtualization. The IT Ops team at Globex want to modernize the customers database by migrating it to OpenShift containerization.
+* customers 서비스는 Legacy Virtualization의 VM에서 Apache Tomcat에서 실행되는 오래된 Java 코드 기반을 사용합니다. 이 모듈에서는 이 레거시 Java 애플리케이션을 평가하고 분석하여 Java 코드를 현대화하고 Red Hat JBoss Web Server 위에 있는 OpenShift에 애플리케이션을 배포하는 가장 좋은 방법을 알아봅니다.
+* customers 데이터베이스는 Legacy Virtualization에서 VM으로 실행되는 PostgreSQL 데이터베이스를 사용합니다. Globex의 IT 운영 팀은 고객 데이터베이스를 OpenShift 컨테이너화로 마이그레이션하여 현대화하려고 합니다.
 
-Once you have finished the all of the modules in this workshop, your deployment architecture will look like this:
+이 워크숍의 모든 모듈을 완료했을 때 보이는 배포 아키텍처는 다음과 같습니다.
 
 image::architecture_completed.png[architecture_completed]
 
-== 1.2. Workshop Environment
+== 1.2. 워크숍 환경
 
-=== 1.2.1. Confirm Your Username!
+=== 1.2.1. 유저 이름을 확인하세요!
 
-Look in the box at the top of your screen. Is your username set already? If so it will look like this:
+화면 상단의 상자를 살펴보세요. 유저 이름이 이미 설정되어 있나요? 그렇다면 다음과 같이 표시됩니다.
 
 image::alreadyset.png[alreadyset]
 
-If your `username` is properly set, then you can move on. *If not, in the above box, enter the user ID you were assigned* like this:
+`username` 이 제대로 설정되었다면 다음으로 넘어갈 수 있습니다. *그렇지 않다면 할당된 유저 ID를 위의 상자에 다음과 같이 입력하세요.*
 
 image::setuser.png[setuser]
 
-This will customize the links and copy/paste code for this workshop. If you accidentally type the wrong username, just update your username in the URL parameters (e.g., `1-introduction.html?USERID=%USERID%` )
+이렇게 하면 이 워크숍의 링크와 복사/붙여넣기 코드가 커스터마이징됩니다. 실수로 잘못된 유저 이름을 입력한 경우 URL 매개변수에서 유저 이름을 업데이트하기만 하면 됩니다(예: `1-introduction.html?USERID=%USERID%` )
 
 [IMPORTANT]
 ====
-You have to use *an unique username* (e.g. `%USERID%`) while you're running the hands-on labs. For example, you need to deploy applications to your own project (e.g. retail-%USERID%).
+핸즈온 랩을 실행하는 동안 *고유한 사용자 이름*(예: `%USERID%`)을 사용해야 합니다. 예를 들어, 자신의 프로젝트에 애플리케이션을 배포해야 합니다(예: retail-%USERID%).
 ====
 
-=== 1.2.2. OpenShift Cluster
+=== 1.2.2. 오픈시프트 클러스터
 
-Your OpenShift cluster is already configured with everything you need. Here are the details:
+귀하의 OpenShift 클러스터는 이미 필요한 모든 것이 구성되어 있습니다. 자세한 내용은 다음과 같습니다.
 
-* `Gitea` to host the source code repositories
-* `OpenShift GitOps` to manage the deployed services using a GitOps approach through ArgoCD
-* `OpenShift Pipelines` to build the customer application from source code and deploy to the `retail` project using GitOps
-* `Migration Toolkit for Applications` to help modernize the customer service.
+* 소스 코드 저장소를 호스팅하는 `Gitea`
+* GitOps 접근 방식을 사용하여, ArgoCD를 통해 배포된 서비스를 관리하기 위한 `OpenShift GitOps`
+* GitOps를 사용하여 소스 코드에서 고객 애플리케이션을 빌드하고 `retail` 프로젝트에 배포하기 위한 `OpenShift Pipelines`
+* customer 서비스 현대화에 도움이 되는 `Migration Toolkit for Applications`
 
-=== 1.2.3. Visual Studio Code Server
+=== 1.2.3. Visual Studio Code 서버
 
-VSCode is already deployed in the OpenShift cluster for you you to use as your IDE. This means you don't need to install and configure anything on your system. This makes it easy to change source code and configuration files in the cloned repository.
+VSCode는 이미 OpenShift 클러스터에 배포되어 IDE로 사용할 수 있습니다. 즉, 시스템에 아무것도 설치하고 구성할 필요가 없습니다. 이렇게 하면 복제된 리포지토리에서 소스 코드와 구성 파일을 쉽게 변경할 수 있습니다.
 
-To get started, access the link:https://codeserver-codeserver-%USERID%.%SUBDOMAIN%[VS Code server instance^] and log in using the following `password`.
+시작하려면 링크: https://codeserver-codeserver-%USERID%.%SUBDOMAIN%[VS Code 서버 인스턴스^]에 액세스하고 다음 `비밀번호` 를 사용하여 로그인하세요.
 
-* Password: `{openshift-password}`
+* 비밀번호: `{openshift-password}`
 
 image::vscode-server-login.png[vscode-server-login]
 
-The graphical user interface (GUI) should look like:
+그래픽 사용자 인터페이스(GUI)는 다음과 같습니다.
 
 image::vscode.png[VSCode]
 
-== 1.3. Log in to OpenShift
+== 1.3. OpenShift에 로그인
 
-Confirm you're able to access the retail services application by accessing its frontend web application. To find the URL to access the *Frontend* application, you need to use the OpenShift command line tool (`oc`). Go to the VS Code server and Open a new terminal that already installed the _oc_ command by default.
+Frontend 웹 애플리케이션에 액세스하여 리테일 서비스 애플리케이션에 액세스할 수 있는지 확인하세요. *Frontend* 애플리케이션에 액세스할 URL을 찾으려면 OpenShift 명령줄 도구(`oc`)를 사용해야 합니다. 
 
-Click on `New Terminal` in Terminal menu in the VS Code. Once a new terminal is open, run the following _oc_ command.
+VS Code 서버로 이동하여, _oc_ 명령어가 사전에 설치되어 있는 새 터미널을 엽니다.
+
+VS Code의 Terminal 메뉴에서 `New Terminal` 을 클릭합니다. 새 터미널이 열리면 다음과 같이 _oc_ 명령어를 실행합니다.
 
 [.console-input]
 [source,bash]
@@ -110,12 +112,14 @@ image::vscode-terminal.png[vscode-terminal]
 
 [NOTE]
 ====
-If you see a popup message about allowing copy/paste, *"See text and images copied to the clipboard"*, click on `Allow`. Then you might also see `"Use insecure connections?"` message in the terminal. In case, press `y`.
+복사/붙여넣기 허용에 대한 팝업 메시지가 나타나면, *"클립보드에 복사된 텍스트와 이미지를 확인하세요"*, `허용` 을 클릭합니다. 그러면 터미널에서 `"안전하지 않은 연결을 사용하시겠습니까?"` 라는 메시지가 표시될 수도 있습니다. 그럴 경우 `y` 를 누릅니다.
 ====
 
-== 1.4 Change the Working Project
+== 1.4 작업할 브랜치 변경
 
-Make sure to *check out* to the right branch, `ocp-4.15` that you'll go through this module today! Run the following `git` command in the VS Code terminal.
+오늘 이 모듈에서 사용할 올바른 브랜치인 `ocp-4.15` 로 *check out* 하세요!
+
+VS Code 터미널에서 다음 `git` 명령을 실행합니다.
 
 [.console-input]
 [source,bash]
@@ -123,7 +127,7 @@ Make sure to *check out* to the right branch, `ocp-4.15` that you'll go through 
 git checkout ocp-4.15
 ----
 
-The output should be something like this.
+출력은 다음과 같아야 합니다.
 
 [.console-output]
 [source,bash,subs="+attributes,macros+"]
@@ -132,8 +136,8 @@ branch 'ocp-4.15' set up to track 'origin/ocp-4.15'.
 Switched to a new branch 'ocp-4.15'
 ----
 
-== Congratulations!
+== 축하합니다!
 
-You have now successfully learned about the architecture of the application and confirmed your workshop environment.
+이제 애플리케이션 아키텍처에 대해 성공적으로 알아보고 워크숍 환경을 확인했습니다.
 
-In the next step, you'll continue the modernization process by analyzing the source code of one of the applications and refactor it to run as a Linux container on OpenShift.
+다음 단계에서는 애플리케이션 소스 코드를 분석하고 리팩토링하여 OpenShift에서 Linux 컨테이너로 실행되도록 현대화 과정을 계속합니다.

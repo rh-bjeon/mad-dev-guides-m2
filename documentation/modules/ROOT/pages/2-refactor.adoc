@@ -1,33 +1,33 @@
-= 2. Refactor - 40 minutes
+= 2. 리팩토링 - 40분
 :imagesdir: ../assets/images
 
-== Goals of this lab
+== 이 랩의 목표
 
-The goal of this lab is to understand the modernization issues related to the `customers` application that you found in the previous exercise and learn how you can resolve them by code modification. The MTA Analysis report also provides the details in terms of the *file name*, *path*, and *solution recommendations* for each issue.
+이 랩의 목표는 이전 연습에서 발견한 `customers` 애플리케이션과 관련된 현대화 문제를 이해하고 코드 수정을 통해 이를 해결하는 방법을 배우는 것입니다. MTA 분석 보고서는 또한 각 문제에 대한 *파일 이름*, *경로* 및 *솔루션 권장사항* 측면에서 세부 정보를 제공합니다.
 
-At the end, you will again analyze the customers application using MTA Analysis to confirm that the issues were successfully fixed.
+마지막으로 MTA 분석을 사용하여 고객 애플리케이션을 다시 분석하여 문제가 성공적으로 해결되었는지 확인합니다.
 
-== 2.1. Explore the Migration issues
+== 2.1. 마이그레이션 문제 탐색
 
-According to the analysis result in the previous module, the migration issues are related to external configurations with *hard-coded static IP addresses*.
+이전 모듈의 분석 결과에 따르면 마이그레이션 문제는 *하드코딩된 정적 IP 주소* 를 사용하는 외부 구성과 관련이 있습니다.
 
-image::static-ip-issue.png[static-ip-issue]
+image::static-ip-issue.png[정적-ip-문제]
 
-Let's look into the issue at the code level. In your VS Code server window, open the the `customers-tomcat-legacy` project and find `PersistenceConfig.java` file in *src/main/java/io/konveyor/demo/ordermanagement/config* directory.
+코드 수준에서 문제를 살펴보겠습니다. VS Code 서버 창에서 `customers-tomcat-legacy` 프로젝트를 열고 *src/main/java/io/konveyor/demo/ordermanagement/config* 디렉토리에서 `PersistenceConfig.java` 파일을 찾습니다.
 
-image::persistence-class.png[persistence-class]
+image::persistence-class.png[지속성-클래스]
 
-The `dataSource()` method creates an `ApplicationConfiguration` instance to configure JDBC variables such as _driverClassName_, _url_, _user_, and _password_. As you can see, the ApplicationConfiguration has a hard coded IP address reference in `persistence.properties`.
+`dataSource()` 메서드는 _driverClassName_, _url_, _user_, _password_ 와 같은 JDBC 변수를 구성하기 위해 `ApplicationConfiguration` 인스턴스를 생성합니다. 보시다시피, ApplicationConfiguration에는 `persistence.properties` 에 하드 코딩된 IP 주소 참조가 있습니다.
 
-image::applicationConfiguration-class.png[applicationConfiguration-class]
+image::applicationConfiguration-class.png[애플리케이션 구성 클래스]
 
-== 2.2. Fix the External Configuration issues
+== 2.2. 외부 구성 문제 수정
 
-The legacy ApplicationConfiguration class is being used in this application. This is discouraged by the migration guidelines, and should be replaced by a more appropriate approach using Spring's `@PropertySource` annotation and `Environment` class.
+이 애플리케이션에서는 레거시 ApplicationConfiguration 클래스를 사용하고 있습니다. 이는 마이그레이션 가이드라인에서 권장하지 않으며 Spring의 `@PropertySource` 주석과 `Environment` 클래스를 사용하는 더 적절한 접근 방식으로 대체해야 합니다.
 
-=== 2.2.1. Add Spring PropertySource annotation
+=== 2.2.1. Spring PropertySource 주석 추가
 
-Add the following annotation on top of `PersistenceConfig` public class.
+`PersistenceConfig` 퍼블릭 클래스 위에 다음 주석을 추가합니다.
 
 [.console-input]
 [source,java,subs="+attributes,macros+"]
@@ -35,9 +35,9 @@ Add the following annotation on top of `PersistenceConfig` public class.
 @PropertySource("classpath:persistence.properties")
 ----
 
-=== 2.2.2. Update DataSource method
+=== 2.2.2. DataSource 메서드 업데이트
 
-Then, inject an instance of the `Environment` class using the Spring `@Autowired` annotation to refer to the local application configuration. Add the following class variable to the _PersistenceConfig_ class.
+그런 다음 Spring `@Autowired` 주석을 사용하여 `Environment` 클래스의 인스턴스를 주입하여 로컬 애플리케이션 구성을 참조합니다. 다음 클래스 변수를 _PersistenceConfig_ 클래스에 추가합니다.
 
 [.console-input]
 [source,java,subs="+attributes,macros+"]
@@ -46,7 +46,7 @@ Then, inject an instance of the `Environment` class using the Spring `@Autowired
     private Environment env;
 ----
 
-Replace the `dataSource()` method with the following code to get JDBC configurations through this the _Environment_ injection.
+_Environment_ 주입을 통해 JDBC configurations을 가져오려면 `dataSource()` 메서드를 다음 코드로 교체하세요.
 
 [.console-input]
 [source,java,subs="+attributes,macros+"]
@@ -63,13 +63,13 @@ Replace the `dataSource()` method with the following code to get JDBC configurat
     }
 ----
 
-The `PersistenceConfig` class should look like this.
+`PersistenceConfig` 클래스는 다음과 같이 보여야 합니다.
 
-image::datasource-modification.png[datasource-modification]
+image::datasource-modification.png[데이터소스-수정]
 
-=== 2.2.3. Update additionalProperties method
+=== 2.2.3. additionalProperties 메서드 업데이트
 
-You also need to remove the *ApplicationConfiguration* reference in the `additionalProperties()` method. Replace the existing _additionalProperties_ method with the following code.
+또한 `additionalProperties()` 메서드에서 *ApplicationConfiguration* 참조를 제거해야 합니다. 기존 _additionalProperties_ 메서드를 다음 코드로 교체하세요.
 
 [.console-input]
 [source,java,subs="+attributes,macros+"]
@@ -84,11 +84,11 @@ You also need to remove the *ApplicationConfiguration* reference in the `additio
     }
 ----
 
-=== 2.2.4. Update Packages
+=== 2.2.4. 패키지 업데이트
 
-Remove unnecessary package imports (e.g. _ApplicationConfiguration_) and add new package images for DI injection and PropertySource.
+불필요한 package imports(예: _ApplicationConfiguration_)를 제거하고 DI 주입 및 PropertySource를 위한 새로운 패키지 이미지를 추가합니다.
 
-The easiest way to do this is to replace all of the imports at the top of the file with this set of imports:
+이를 수행하는 가장 쉬운 방법은 파일 맨 위의 모든 imports를 다음 imports 세트로 바꾸는 것입니다.
 
 [.console-input]
 [source,java,subs="+attributes,macros+"]
@@ -114,7 +114,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 [IMPORTANT]
 ====
-Please make sure you don't remove the package name from the class and the end result is like this.
+클래스에서 패키지 이름을 제거하지 않도록 주의하세요. 그러면 최종 결과가 이와 같습니다.
 ====
 
 [.console-output]
@@ -123,11 +123,11 @@ Please make sure you don't remove the package name from the class and the end re
 package io.konveyor.demo.ordermanagement.config;
 ----
 
-=== 2.2.5. Remove Corporate libraries
+=== 2.2.5. 상용 라이브러리 제거
 
-With these changes, you don't need to refer to the external corporate libraries anymore. You can easily remove or comment out the dependency in your Maven project.
+이러한 변경 사항을 통해 더 이상 외부 상용 라이브러리를 참조할 필요가 없습니다. Maven 프로젝트에서 종속성을 쉽게 제거하거나 주석 처리할 수 있습니다.
 
-Open the `pom.xml` and comment (or remove) the following `config-utils` dependency.
+`pom.xml` 을 열고 다음 `config-utils` 종속성을 주석 처리(또는 제거)합니다.
 
 [.console-input]
 [source,xml,subs="+attributes,macros+"]
@@ -140,22 +140,22 @@ Open the `pom.xml` and comment (or remove) the following `config-utils` dependen
 		</dependency> -->
 ----
 
-image::comment-dep.png[comment-dep]
+image::comment-dep.png[주석-dep]
 
-=== 2.2.6. Update application.properties
+=== 2.2.6. application.properties 업데이트
 
-In the meantime, the Globex retails system's *SRE team* has already migrated the `PostgreSQL database` running `Red Hat OpenShift`.
+그 사이에 Globex 소매 시스템의 **SRE 팀**은 이미 `Red Hat OpenShift` 를 실행하는 `PostgreSQL 데이터베이스` 를 마이그레이션했습니다.
 
-Access the link:https://console-openshift-console.%SUBDOMAIN%/topology/ns/retail-%USERID%?view=graph[Topology view^] of retail-%USERID% project in the Developer perspective. You will see the `postgresql-database` container on OpenShift.
+OpenShift 웹 콘솔의 개발자 관점 탭에서, retail-%USERID% 프로젝트의 link:https://console-openshift-console.%SUBDOMAIN%/topology/ns/retail-%USERID%?view=graph[Topology view^]를 클릭하세요. `postgresql-database` 컨테이너를 볼 수 있습니다.
 
-* Username: `%USERID%`
-* Password: `{openshift-password}`
+* 사용자 이름 : `%USERID%`
+* 비밀번호: `{openshift-password}`
 
-image::retail-topology.png[comment-dep]
+image::retail-topology.png[주석-종속]
 
-In VSCode, Open the `persistence.properties` in the *src/main/resources* folder to access the *customers* data in the new *postgresql-customer* container on OpenShift.
+VSCode에서 *src/main/resources* 폴더에 있는 `persistence.properties` 를 열어 OpenShift의 새 *postgresql-customer* 컨테이너에 있는 *customers* 데이터에 액세스합니다.
 
-Replace the following `jdbc.url`.
+다음의 `jdbc.url` 을 바꾸세요.
 
 [.console-input]
 [source,properties,subs="+attributes,macros+"]
@@ -163,11 +163,11 @@ Replace the following `jdbc.url`.
 jdbc.url=jdbc:postgresql://postgresql-customer.retail-%USERID%.svc.cluster.local:5432/customer
 ----
 
-image::update-app-props.png[update-app-props]
+image::update-app-props.png[업데이트-앱-속성]
 
-=== 2.2.7. Test the build
+=== 2.2.7. 빌드 테스트
 
-Go to the `Terminal` window in VS Code server. Then, build and package the customer application again:
+VS Code 서버에서 `Terminal` 창으로 이동합니다. 그런 다음 customer 애플리케이션을 다시 빌드하고 패키징합니다.
 
 [.console-input]
 [source,sh,subs="+attributes,macros+"]
@@ -176,7 +176,7 @@ cd $HOME/modern-app-dev/customers-tomcat-legacy/ &&
 mvn clean package
 ----
 
-The output should end up with `BUILD SUCCESS`.
+출력은 `BUILD SUCCESS` 로 끝나야 합니다.
 
 [.console-output]
 [source,bash,subs="+attributes,macros+"]
@@ -194,46 +194,46 @@ The output should end up with `BUILD SUCCESS`.
 [INFO] ------------------------------------------------------------------------
 ----
 
-=== 2.2.8. Commit and Push Changes
+=== 2.2.8. 변경사항 커밋 및 푸시
 
-Before you analyzing the MTA report, you need to commit and push changes to Gitea repository. Go back to VS Code and select `Source Control` menu on the left.
+MTA 보고서를 분석하기 전에 Gitea 저장소에 변경사항을 커밋하고 푸시해야 합니다. VS Code로 돌아가서 왼쪽의 `Source Control` 메뉴를 선택합니다.
 
-You will see 3 changes:
+3가지 변화가 보일 것입니다:
 
 * pom.xml
 * PersistenceConfig.java
 * persistence.properties
 
-Type `Fix migration issues` in the comment. Select `Commit`.
+코멘트에 `Fix migration issues` 를 입력합니다. `Commit` 을 선택합니다.
 
-image::code-commit.png[code-commit]
+image::code-commit.png[코드 커밋]
 
-Select `Yes`.
+`Yes` 를 선택하세요.
 
-image::code-commit-yes.png[code-commit]
+image::code-commit-yes.png[코드 커밋]
 
-Select `Sync Changes`.
+`Sync Changes` 를 선택하세요.
 
-image::sync-changes.png[sync-changes]
+image::sync-changes.png[동기화-변경]
 
 [NOTE]
 ====
-You might see *Would you like code-server to periodically run "git fetch"?* popup message on the right bottom. Then, you can ignore it.
+오른쪽 하단에 **Would you like code-server to periodically run "git fetch"? (코드 서버에서 주기적으로 "git fetch"를 실행하시겠습니까?)** 팝업 메시지가 표시될 수 있습니다. 이 메시지는 무시해도 됩니다.
 ====
 
-If you go back to your link:https://gitea.%SUBDOMAIN%/%USERID%/modern-app-dev/src/branch/ocp-4.15[Gitea repository^], you will see the commit. Make sure that you're referring to the *ocp-4.15* branch.
+link:https://gitea.%SUBDOMAIN%/%USERID%/modern-app-dev/src/branch/ocp-4.15[Gitea repository^]로 돌아가면 커밋이 보일 겁니다. *ocp-4.15* 브랜치를 참조하고 있는지 확인하세요.
 
-image::gitea-commit.png[gitea-commit]
+image::gitea-commit.png[gitea-커밋]
 
-=== 2.2.9. Re-run MTA Analysis
+=== 2.2.9. MTA 분석 다시 실행
 
-Go back to the link:https://mta-mta-%USERID%.%SUBDOMAIN%/applications/analysis-tab[MTA Analysis web console^] and create a new inventory element to analyze the modernized application (*customers*).
+link:https://mta-mta-%USERID%.%SUBDOMAIN%/applications/analysis-tab[MTA 분석 웹 콘솔^]로 돌아가서 현대화된 애플리케이션(*customers*)을 분석하기 위한 새 inventory element를 만듭니다.
 
-Click on `Create new`.
+`Create new` 를 클릭하세요.
 
 image::mta-new-analysis.png[mta-new-analysis]
 
-Fill in the following fields, and click `Create`:
+다음 필드를 입력하고 `Create` 를 클릭하세요.
 
 * Name: `New Customers`
 * Description: `Modernized Customers management service`
@@ -249,47 +249,47 @@ Fill in the following fields, and click `Create`:
 image::mta-new-app.png[mta-new-app]
 image::mta-new-app-2.png[mta-new-app]
 
-Once you go back to the Application inventory page, search `New Customers` by name. Then, choose the _New Customers_ application inventory. Click on `Analyze`.
+애플리케이션 인벤토리 페이지로 돌아가면 이름으로 `New Customers` 를 검색합니다. 그런 다음 _New Customers_ 애플리케이션 인벤토리를 선택하고, `Analyze` 를 클릭합니다.
 
 image::mta-search-new-customers.png[mta-search-new-customers]
 
 [NOTE]
 ====
-In case you run the MTA report for the first time (e.g., you skipped module 1), go to the *Administration* view, select *Repositories > Git*. `Toggle` the *Consume insecure Git repositories* switch to the right.
+처음으로 MTA 보고서를 실행하는 경우(예: 모듈 1을 건너뛴 경우) *Administration* view로 가서 *저장소 > Git* 을 선택합니다. *Consume insecure Git repositories* 스위치를 오른쪽으로 토글합니다.
 
-image::mta-admin-git.png[admin git]
+image::mta-admin-git.png[관리자 git]
 
-You can also log in to the Gitea repository with the following credentials.
+다음 자격증명을 사용하여 Gitea 저장소에 로그인할 수도 있습니다.
 
-* Username - `%USERID%`
-* Password - `{openshift-password}`
+* 사용자 이름 - `%USERID%`
+* 비밀번호 - `{openshift-password}`
 ====
 
-Select `Source dode` in Analysis mode popup.
+분석 모드 팝업에서 `Source code`를 선택합니다.
 
-image::add-applications.png[Add applications]
+image::add-applications.png[애플리케이션 추가]
 
-Click on `Next`.
+`Next` 를 클릭하세요.
 
-You will now be presented with options for transformation targets. Click on `Containers`, `Linux`, and `OpenJDK` as parameters for the application analysis just as before.
+이제 변환 대상에 대한 옵션이 표시됩니다. 이전과 마찬가지로 애플리케이션 분석에 대한 매개변수로 `Containers`, `Linux`, `OpenJDK` 를 클릭합니다.
 
-image::configure-analysis-checked.png[Configure Analysis]
+image::configure-analysis-checked.png[분석 구성]
 
-Click on `Next`.
+`Next` 를 클릭하세요.
 
-Select `Application and internal dependencies only` for the scope of dependencies.
+종속성 범위로 `Application and internal dependencies only` (애플리케이션 및 내부 종속성만)을 선택합니다.
 
-image::packages.png[Select packages]
+image::packages.png[패키지 선택]
 
-Click on `Next`.
+`Next` 를 클릭하세요.
 
-You will now be presented with options for custom rules.
+이제 사용자 정의 규칙에 대한 옵션이 제공됩니다.
 
-image::custom-rules.png[Custom rules]
+image::custom-rules.png[사용자 정의 규칙]
 
-Select `Repository` tab to refer to a custom rule (`corporate-framework-config.windup.xml`) in the *customrules* directory of your Gitea repository.
+Gitea 저장소의 *customrules* 디렉토리에 있는 사용자 정의 규칙(`corporate-framework-config.windup.xml`)을 참조하려면 `Repository` 탭을 선택합니다.
 
-Key in the following information in the repository page.
+repository 페이지에 다음 정보를 입력하세요.
 
 * Repository type - `Git`
 * Source Repository - `https://gitea.%SUBDOMAIN%/%USERID%/modern-app-dev.git`
@@ -299,41 +299,40 @@ Key in the following information in the repository page.
 
 [NOTE]
 ====
-In case you don't see `None` in the `Associated credentials`, please leave it since the field is not mandatory.
+`Associated credentials`에 `None`이 표시되지 않은 경우, 해당 필드는 필수가 아니므로 그대로 두십시오.
 ====
 
-image::add-repository-customrules.png[add-repository-customrules]
+image::add-repository-customrules.png[저장소-사용자 정의 규칙 추가]
 
-Click on `Next`.
+`Next` 를 클릭하세요.
 
-Next, click on `Next` in `Advanced options` to stick with the default options.
+다음으로, 기본 옵션을 사용하려면 `Advanced options`에서 그냥 `Next` 를 클릭하세요.
 
-image::fine-tune.png[Fine tuning]
+image::fine-tune.png[미세조정]
 
-Lastly, we are presented with a summary of the configuration for our analysis.
+마지막으로, 분석을 위한 구성 요약을 제공합니다.
 
-image::finish-project.png[Finish project]
+image::finish-project.png[프로젝트 완료]
 
-Click on `Run`.
+`Run` 을 클릭하세요.
 
-Now the new analysis will start, and once it is finished you will be able to access the reports. Stay on this view until the analysis is finished.
+이제 새로운 분석이 시작되고 완료되면 보고서에 액세스할 수 있습니다. 분석이 완료될 때까지 이 뷰에 머물러 있습니다.
 
 [NOTE]
 ====
-The analysis will take a few minutes to pull the Windup image and execute the application analysis.
+분석을 위해 Windup 이미지를 가져오고 애플리케이션 분석을 실행하는 데 몇 분이 걸립니다.
 ====
 
-image::new-active-analysis.png[Active analysis]
+image::new-active-analysis.png[활성 분석]
 
-Select *Customers* application. Then click on `Issues` in the *Details* tab on the right.
+*Customers* 애플리케이션을 선택합니다. 그런 다음 오른쪽의 *Details* 탭에서 `Issues` 를 클릭합니다.
 
-image::new-active-analysis-report.png[Active analysis]
+image::new-active-analysis-report.png[활성 분석]
 
-Configure the project with the same settings and custom rules that we used for the Customers Service project. Once the report is finished, verify that you have `no` issues with the application.
+Customers Service 프로젝트에 사용한 것과 동일한 설정과 사용자 지정 규칙으로 프로젝트를 구성합니다. 보고서가 완료되면 애플리케이션에 `issues` 가 없음을 확인합니다.
 
-## Congratulations!
+## 축하해요!
 
-You have successfully migrated this app and now ready to deploy to OpenShift, *congratulations!*
+이 앱을 성공적으로 마이그레이션했으며 이제 OpenShift에 배포할 준비가 되었습니다. *축하합니다!*
 
-image::new-report-solution-view.png[New view report]
-
+image::new-report-solution-view.png[새로운 뷰 보고서]

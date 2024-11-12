@@ -1,20 +1,19 @@
-= 3. Deploy to Kubernetes - 10 minutes
+= 3. Kubernetes에 배포 - 10분
 :imagesdir: ../assets/images
 
-== Goals of this lab
+== 이 랩의 목표
 
-The goal of this exercise is to build and deploy the modernized customer application to OpenShift using link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html-single/cicd/index#builds-binary-source_creating-build-inputs[OpenShift Binary Build and Deployment^].
+이 실습의 목표는 link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html-single/cicd/index#builds-binary-source_creating-build-inputs[OpenShift Binary Build and Deployment^]를 사용하여 현대화된 고객 애플리케이션을 빌드하고 OpenShift에 배포하는 것입니다.
 
-You will:
+다음과 같은 내용을 진행합니다:
+* Apache Tomcat 대신 Red Hat JBoss 웹 서버를 런타임으로 사용하여 새롭고 현대화된 애플리케이션을 빌드하고 배포하려면 OpenShift 바이너리 빌드 전략을 사용합니다.
+* 새로운 *customers* 서비스 테스트
 
-* Use the OpenShift binary build strategy to build and deploy the new, modernized application using Red Hat JBoss Web Server instead of Apache Tomcat as the runtime.
-* Test the new *customers* service
-
-== 3.1. Create a new project
+== 3.1. 새 프로젝트 만들기
 
 [IMPORTANT]
 ====
-In case you haven't already logged in to the OpenShift cluster, run the following `oc` command in VS Code server terminal.
+아직 OpenShift 클러스터에 로그인하지 않은 경우 VS Code 서버 터미널에서 다음 `oc` 명령을 실행하세요.
 
 [.console-input]
 [source,bash]
@@ -23,7 +22,7 @@ oc login -u %USERID% -p openshift https://openshift.default.svc:443
 ----
 ====
 
-Create a new project in the OpenShift cluster to deploy our newly-modernized application, *customers*. Run the following command in the terminal.
+OpenShift 클러스터에서 새 프로젝트를 만들어 새롭게 현대화된 애플리케이션인 *customers* 를 배포합니다. 터미널에서 다음 명령을 실행합니다.
 
 [.console-input]
 [source,bash,subs="+attributes,macros+"]
@@ -31,9 +30,9 @@ Create a new project in the OpenShift cluster to deploy our newly-modernized app
 oc new-project customers-qa-%USERID%
 ----
 
-== 3.2. Prepare the directory structure
+== 3.2. 디렉토리 구조 준비
 
-Create a directory for the binary build on your local file system and the `deployments/` subdirectory. Copy the WAR archive to `deployments/` directory by running the following commands in the terminal:
+로컬 파일 시스템과 `deployments/` 하위 디렉토리에 바이너리 빌드를 위한 디렉토리를 만듭니다. 터미널에서 다음 명령을 실행하여 WAR 아카이브를 `deployments/` 디렉토리로 복사합니다.
 
 [.console-input]
 [source,bash,subs="+attributes,macros+"]
@@ -45,9 +44,9 @@ mkdir -p ocp/deployments
 cp target/customers-tomcat-0.0.1-SNAPSHOT.war ocp/deployments/
 ----
 
-== 3.3. Build the application container image
+== 3.3. 애플리케이션 컨테이너 이미지 빌드
 
-Create a new build configuration, specifying image stream and application name. Run the following command in the terminal to do this:
+이미지 스트림과 애플리케이션 이름을 지정하여 새 빌드 구성을 만듭니다. 이를 위해 터미널에서 다음 명령을 실행합니다.
 
 [.console-input]
 [source,bash,subs="+attributes,macros+"]
@@ -57,7 +56,7 @@ oc new-build --binary=true \
  --name=customers
 ----
 
-The output should look like this.
+출력 결과는 다음과 같습니다.
 
 [.console-output]
 [source,bash,subs="+attributes,macros+"]
@@ -80,11 +79,11 @@ The output should look like this.
 --> Success
 ----
 
-== 3.4. Start the binary build
+== 3.4. 바이너리 빌드 시작
 
-Start the binary build based on that build configuration just created. Instruct OpenShift to use the `ocp` directory you created for the binary input for the image build.
+방금 만든 빌드 구성을 기반으로 바이너리 빌드를 시작합니다. OpenShift에 이미지 빌드의 바이너리 입력을 위해 만든 `ocp` 디렉토리를 사용하도록 지시합니다.
 
-Run the following command in the terminal to start the build:
+빌드를 시작하려면 터미널에서 다음 명령을 실행하세요.
 
 [.console-input]
 [source,bash,subs="+attributes,macros+"]
@@ -92,7 +91,7 @@ Run the following command in the terminal to start the build:
 oc start-build customers --from-dir=./ocp --follow
 ----
 
-The output should end up with this.
+출력은 다음과 같아야 합니다.
 
 [.console-output]
 [source,bash,subs="+attributes,macros+"]
@@ -112,9 +111,9 @@ Successfully pushed image-registry.openshift-image-registry.svc:5000/customers-q
 Push successful
 ----
 
-== 3.5. Create a new OpenShift application
+== 3.5. 새로운 OpenShift 애플리케이션 생성
 
-Create a new OpenShift application based on the newly-built container image. Run the following command in the terminal.
+새로 빌드된 컨테이너 이미지를 기반으로 새로운 OpenShift 애플리케이션을 만듭니다. 터미널에서 다음 명령을 실행합니다.
 
 [.console-input]
 [source,bash,subs="+attributes,macros+"]
@@ -122,7 +121,7 @@ Create a new OpenShift application based on the newly-built container image. Run
 oc new-app customers
 ----
 
-The output should look like this.
+출력 결과는 다음과 같습니다.
 
 [.console-output]
 [source,bash,subs="+attributes,macros+"]
@@ -145,7 +144,7 @@ The output should look like this.
     Run 'oc status' to view your app.
 ----
 
-You can add the following label to show the application running on the JBoss Web Server. Run the following command in the terminal.
+다음 레이블을 추가하여 JBoss 웹 서버에서 실행 중인 애플리케이션을 표시할 수 있습니다. 터미널에서 다음 명령을 실행합니다.
 
 [.console-input]
 [source,bash,subs="+attributes,macros+"]
@@ -153,25 +152,24 @@ You can add the following label to show the application running on the JBoss Web
 oc label deployment/customers app.openshift.io/runtime=rh-tomcat
 ----
 
-== 3.6. Verify the new customers application
+== 3.6. 신규 customers 애플리케이션 확인
 
-`Congratulations!` You just deployed a new *customers* application successfully to the OpenShift cluster. 
+축하합니다! OpenShift 클러스터에 새로운 *customers* 애플리케이션을 성공적으로 배포했습니다.
 
-* Access link:https://console-openshift-console.%SUBDOMAIN%/topology/ns/customers-qa-%USERID%?view=graph[Topology view^] if the application is running in the customers-qa-%USERID% project.
+* 애플리케이션이 customers-qa-%USERID% 프로젝트에서 실행 중인 경우 link:https://console-openshift-console.%SUBDOMAIN%/topology/ns/customers-qa-%USERID%?view=graph[토폴로지 뷰^]에 액세스합니다.
 
-Use the following credentials if you haven't logged in to the OpenShift cluster before. OpenShift is already integrated with https://access.redhat.com/products/red-hat-single-sign-on/[Red Hat Single Sign On^].
+이전에 OpenShift 클러스터에 로그인한 적이 없다면 다음 자격증명을 사용하세요. OpenShift는 이미 https://access.redhat.com/products/red-hat-single-sign-on/[Red Hat Single Sign On^]과 통합되어 있습니다.
 
 image::sso_login.png[openshift_login]
 
-* Login using your credentials:
+* 자격증명을 사용하여 로그인하세요:
 
-** Username: `%USERID%`
-** Password: `{openshift-password}`
+** 사용자 이름: `%USERID%`
+** 비밀번호: `{openshift-password}`
 
+image::customers-qa-topology.png[고객-qa-토폴로지]
 
-image::customers-qa-topology.png[customers-qa-topology]
-
-Access the following RESTful API of the customers application to retrieve the customer data in the new PostgreSQL database on OpenShift virtualization.
+OpenShift 가상화의 새 PostgreSQL 데이터베이스에서 고객 데이터를 검색하려면 고객 애플리케이션의 다음 RESTful API에 액세스하세요.
 
 [.console-input]
 [source,bash]
@@ -179,7 +177,7 @@ Access the following RESTful API of the customers application to retrieve the cu
 curl http://customers.customers-qa-%USERID%.svc.cluster.local:8080/customers-tomcat-0.0.1-SNAPSHOT/customers/1 ; echo
 ----
 
-The output should look like this.
+출력 결과는 다음과 같습니다.
 
 [.console-output]
 [source,bash,subs="+attributes,macros+"]
@@ -187,8 +185,8 @@ The output should look like this.
 {"id":1,"username":"phlegm_master_19","name":"Guybrush","surname":"Threepwood","address":"1060 West Addison","zipCode":"ME-001","city":"Melee Town","country":"Melee Island"}
 ----
 
-This shows that the newly-modernized application running on OpenShift can successfully retrieve customer data from the backend database.
+이는 OpenShift에서 실행되는 새롭게 현대화된 애플리케이션이 백엔드 데이터베이스에서 고객 데이터를 성공적으로 검색할 수 있음을 보여줍니다.
 
-== Summary
+== 요약
 
-Congratulations! You have now successfully remediated all the migration issues you have found and refactored the legacy application. In the next module, you'll learn how to implement `CI/CD` and `GitOps` for advanced application management on your Red Hat OpenShift cluster.
+축하합니다! 이제 발견한 모든 마이그레이션 문제를 성공적으로 해결하고 레거시 애플리케이션을 리팩토링했습니다. 다음 모듈에서는 Red Hat OpenShift 클러스터에서 고급 애플리케이션 관리를 위해 `CI/CD` 및 `GitOps` 를 구현하는 방법을 알아봅니다.
