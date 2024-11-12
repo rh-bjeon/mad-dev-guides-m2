@@ -6,7 +6,7 @@
 이전 모듈에서 소개 연습을 이미 완료했다면, '리팩토링' 랩으로 건너뛰어도 됩니다. 이 연습은 환경을 소개하고 서비스가 올바르게 실행되고 있는지 확인하기 위한 것입니다.
 ====
 
-워크로드를 클라우드로 마이그레이션하거나 현대화하는 것에 대해 말하는 일반적인 방식은 *6R 프레임워크*로 명명되었습니다. 이 프레임워크는 다음과 같이 세분화할 수 있습니다.
+워크로드를 클라우드로 마이그레이션하거나 현대화하는 것에 대해 말하는 일반적인 방식은 *6R 프레임워크* 로 명명되었습니다. 이 프레임워크는 다음과 같이 세분화할 수 있습니다.
 
 image::mod-strategies-refactor.png[Modernization Strategies]
 
@@ -34,7 +34,7 @@ image::architecture_initial_m2.png[architecture_initial_m2]
 
 Globex 리테일 애플리케이션은 _Node.js_ 프론트엔드 서비스로 구성되어 있으며, 데이터는 게이트웨이 서비스를 통해 가져옵니다. 게이트웨이 서비스는 세 개의 백엔드 서비스(customers, orders, inventory)와 연결되어 있으며, 각 서비스는 자체 데이터베이스를 사용해 데이터를 저장합니다.
 
-OpenShift에서 실행 중인 서비스는 `retail-%USERID%` 네임스페이스에 배포됩니다. 이후 모듈에서 *OpenShift GitOps* 와 *Pipelines*를 사용하여 이러한 서비스를 관리하게 됩니다.
+OpenShift에서 실행 중인 서비스는 `retail-%USERID%` 네임스페이스에 배포됩니다. 이후 모듈에서 *OpenShift GitOps* 와 *Pipelines* 를 사용하여 이러한 서비스를 관리하게 됩니다.
 
 [IMPORTANT]
 ====

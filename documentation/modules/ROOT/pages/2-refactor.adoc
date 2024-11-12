@@ -155,7 +155,7 @@ image::retail-topology.png[주석-종속]
 
 VSCode에서 *src/main/resources* 폴더에 있는 `persistence.properties` 를 열어 OpenShift의 새 *postgresql-customer* 컨테이너에 있는 *customers* 데이터에 액세스합니다.
 
-다음의 `jdbc.url` 을 바꾸세요.
+다음 jdbc.url을 교체합니다.
 
 [.console-input]
 [source,properties,subs="+attributes,macros+"]
@@ -265,7 +265,7 @@ image::mta-admin-git.png[관리자 git]
 * 비밀번호 - `{openshift-password}`
 ====
 
-분석 모드 팝업에서 `Source code`를 선택합니다.
+분석 모드 팝업에서 `Source code` 를 선택합니다.
 
 image::add-applications.png[애플리케이션 추가]
 
@@ -299,14 +299,14 @@ repository 페이지에 다음 정보를 입력하세요.
 
 [NOTE]
 ====
-`Associated credentials`에 `None`이 표시되지 않은 경우, 해당 필드는 필수가 아니므로 그대로 두십시오.
+`Associated credentials` 에 `None` 이 표시되지 않은 경우, 해당 필드는 필수가 아니므로 그대로 두십시오.
 ====
 
 image::add-repository-customrules.png[저장소-사용자 정의 규칙 추가]
 
 `Next` 를 클릭하세요.
 
-다음으로, 기본 옵션을 사용하려면 `Advanced options`에서 그냥 `Next` 를 클릭하세요.
+다음으로, 기본 옵션을 사용하려면 `Advanced options` 에서 그냥 `Next` 를 클릭하세요.
 
 image::fine-tune.png[미세조정]
 
@@ -331,8 +331,8 @@ image::new-active-analysis-report.png[활성 분석]
 
 Customers Service 프로젝트에 사용한 것과 동일한 설정과 사용자 지정 규칙으로 프로젝트를 구성합니다. 보고서가 완료되면 애플리케이션에 `issues` 가 없음을 확인합니다.
 
-## 축하해요!
+## 축하합니다!
 
-이 앱을 성공적으로 마이그레이션했으며 이제 OpenShift에 배포할 준비가 되었습니다. *축하합니다!*
+이 앱을 성공적으로 마이그레이션했으며 이제 OpenShift에 배포할 준비가 되었습니다. 
 
 image::new-report-solution-view.png[새로운 뷰 보고서]

@@ -1,5 +1,5 @@
 name: mad-dev-guides-m2
-title: Module 2 - Refactor and Deployment
+title: Module 2 - 리팩토링과 배포
 version: main
 nav:
   - modules/ROOT/nav.adoc

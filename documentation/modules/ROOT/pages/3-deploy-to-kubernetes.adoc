@@ -6,8 +6,9 @@
 이 실습의 목표는 link:https://access.redhat.com/documentation/en-us/openshift_container_platform/4.11/html-single/cicd/index#builds-binary-source_creating-build-inputs[OpenShift Binary Build and Deployment^]를 사용하여 현대화된 고객 애플리케이션을 빌드하고 OpenShift에 배포하는 것입니다.
 
 다음과 같은 내용을 진행합니다:
+
 * Apache Tomcat 대신 Red Hat JBoss 웹 서버를 런타임으로 사용하여 새롭고 현대화된 애플리케이션을 빌드하고 배포하려면 OpenShift 바이너리 빌드 전략을 사용합니다.
-* 새로운 *customers* 서비스 테스트
+* 새로운 **customers** 서비스 테스트
 
 == 3.1. 새 프로젝트 만들기
 
